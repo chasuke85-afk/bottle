@@ -3,47 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Bottle Customizer</title>
+    <title>性癖瓶 Ver.3.0</title>
     <style>
-        :root { --bg: #fff5f7; --accent: #ff85a2; }
-        body { font-family: sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        h1 { color: #555; font-size: 1.2rem; }
-        .container { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; max-width: 800px; }
-        .bottle-card { background: white; border-radius: 15px; padding: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 120px; text-align: center; position: relative; }
-        .bottle { width: 60px; height: 100px; border: 3px solid #555; border-radius: 5px 5px 20px 20px; margin: 10px auto; position: relative; overflow: hidden; background: #eee; cursor: pointer; }
-        .liquid { position: absolute; bottom: 0; width: 100%; transition: height 0.3s ease; }
-        input[type="text"] { width: 90%; border: none; border-bottom: 2px solid #ddd; text-align: center; outline: none; margin-bottom: 5px; }
-        input[type="color"] { border: none; width: 30px; height: 30px; cursor: pointer; background: none; }
-        .controls { margin-top: 30px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-        button { padding: 10px 20px; border: none; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .btn-add { background: var(--accent); color: white; }
-        .btn-share { background: #555; color: white; }
-        .remove-btn { position: absolute; top: 2px; right: 5px; color: #ccc; cursor: pointer; font-size: 0.8rem; }
+        :root { --bg: #fdfbfb; --accent: #ff4d79; }
+        body { font-family: sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 20px; color: #444; }
+        .container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 900px; }
+        .bottle-card { background: white; border-radius: 20px; padding: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.08); width: 150px; text-align: center; }
+        
+        .bottle-frame { width: 70px; height: 110px; border: 3px solid #333; border-radius: 8px 8px 25px 25px; margin: 10px auto; position: relative; overflow: hidden; background: #f0f0f0; }
+        .liquid { position: absolute; bottom: 0; width: 100%; transition: height 0.1s linear; }
+        
+        .color-selector { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
+        .c-btn { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .c-btn.active { border-color: #333; transform: scale(1.2); }
+
+        .pour-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .p-btn { width: 40px; height: 40px; border-radius: 50%; border: none; background: #eee; cursor: pointer; font-size: 1.2rem; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .p-btn:active { background: #ddd; }
+        
+        .slider-label { font-size: 0.7rem; color: #888; margin-top: 5px; display: block; }
+        input[type="range"] { width: 100%; cursor: pointer; accent-color: #666; }
+        input[type="text"] { width: 100%; border: none; border-bottom: 2px solid #eee; text-align: center; font-weight: bold; margin-bottom: 10px; }
+        
+        .controls { margin-top: 40px; display: flex; gap: 15px; }
+        .main-btn { padding: 12px 25px; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; background: #333; color: white; }
     </style>
 </head>
 <body>
 
-    <h1>🍾 性癖瓶（URL共有対応版）</h1>
+    <h1>🍾 性癖瓶 3.0</h1>
+    <p style="font-size: 0.8rem; margin-bottom: 20px;">長押しで注ぐ。スライダーで濃度を調整。</p>
+
     <div class="container" id="bottleContainer"></div>
 
     <div class="controls">
-        <button class="btn-add" onclick="addBottle()">項目を追加</button>
-        <button class="btn-share" onclick="generateShareURL()">共有URLをコピー</button>
+        <button class="main-btn" style="background:var(--accent)" onclick="addBottle()">項目を追加</button>
+        <button class="main-btn" onclick="generateShareURL()">共有URLをコピー</button>
     </div>
 
     <script>
+        // 好き、嫌い、どっちでも
+        const PRESET_COLORS = ['#ff5d8f', '#94a3b8', '#6366f1'];
         let bottles = [];
+        let pressInterval = null;
 
-        // URLからデータを読み込み
         function init() {
             const params = new URLSearchParams(window.location.search).get('d');
             if (params) {
                 try {
                     bottles = JSON.parse(decodeURIComponent(escape(atob(params))));
-                } catch (e) { console.error("データ読み込み失敗"); }
+                } catch (e) { console.error("Load Error"); }
             }
             if (bottles.length === 0) {
-                bottles = [{ name: '首筋', color: '#ffadad', level: 50 }, { name: '太もも', color: '#ffd6a5', level: 30 }];
+                bottles = [{ name: '首筋', color: PRESET_COLORS[0], level: 50, alpha: 0.8 }];
             }
             render();
         }
@@ -55,32 +67,52 @@
                 const card = document.createElement('div');
                 card.className = 'bottle-card';
                 card.innerHTML = `
-                    <span class="remove-btn" onclick="removeBottle(${i})">✖</span>
-                    <input type="text" value="${b.name}" onchange="updateName(${i}, this.value)">
-                    <div class="bottle" onclick="fillLiquid(${i}, event)">
-                        <div class="liquid" style="height: ${b.level}%; background: ${b.color}; shadow: inset 0 0 10px rgba(0,0,0,0.1);"></div>
+                    <input type="text" value="${b.name}" onchange="bottles[${i}].name=this.value">
+                    <div class="color-selector">
+                        ${PRESET_COLORS.map((c, idx) => `
+                            <div class="c-btn ${b.color === c ? 'active' : ''}" 
+                                 style="background:${c}" 
+                                 onclick="updateColor(${i}, '${c}')"></div>
+                        `).join('')}
                     </div>
-                    <input type="color" value="${b.color}" onchange="updateColor(${i}, this.value)">
+                    <div class="bottle-frame">
+                        <div class="liquid" style="height: ${b.level}%; background: ${b.color}; opacity: ${b.alpha}; shadow: inset 0 0 10px rgba(0,0,0,0.1);"></div>
+                    </div>
+                    <div class="pour-controls">
+                        <button class="p-btn" onmousedown="startPress(${i},-2)" onmouseup="stopPress()" onmouseleave="stopPress()" ontouchstart="startPress(${i},-2)" ontouchend="stopPress()">ー</button>
+                        <span style="font-size:0.8rem; font-weight:bold">${b.level}%</span>
+                        <button class="p-btn" onmousedown="startPress(${i},2)" onmouseup="stopPress()" onmouseleave="stopPress()" ontouchstart="startPress(${i},2)" ontouchend="stopPress()">＋</button>
+                    </div>
+                    <label class="slider-label">濃度（純度）</label>
+                    <input type="range" min="0.1" max="1" step="0.05" value="${b.alpha}" oninput="updateAlpha(${i}, this.value)">
+                    <div style="font-size:0.6rem; color:#ccc; margin-top:15px; cursor:pointer" onclick="removeBottle(${i})">削除する</div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        function addBottle() { bottles.push({ name: '新項目', color: '#a0c4ff', level: 0 }); render(); }
-        function removeBottle(i) { bottles.splice(i, 1); render(); }
-        function updateName(i, val) { bottles[i].name = val; }
-        function updateColor(i, val) { bottles[i].color = val; render(); }
-        function fillLiquid(i, e) {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const y = e.clientY - rect.top;
-            bottles[i].level = Math.max(0, Math.min(100, Math.round(100 - (y / rect.height * 100))));
-            render();
+        function startPress(i, diff) {
+            if (pressInterval) return;
+            pressInterval = setInterval(() => {
+                bottles[i].level = Math.max(0, Math.min(100, bottles[i].level + diff));
+                render();
+            }, 50);
         }
+
+        function stopPress() {
+            clearInterval(pressInterval);
+            pressInterval = null;
+        }
+
+        function updateColor(i, color) { bottles[i].color = color; render(); }
+        function updateAlpha(i, val) { bottles[i].alpha = parseFloat(val); render(); }
+        function addBottle() { bottles.push({ name: '新項目', color: PRESET_COLORS[0], level: 0, alpha: 0.8 }); render(); }
+        function removeBottle(i) { bottles.splice(i, 1); render(); }
 
         function generateShareURL() {
             const data = btoa(unescape(encodeURIComponent(JSON.stringify(bottles))));
             const url = window.location.origin + window.location.pathname + '?d=' + data;
-            navigator.clipboard.writeText(url).then(() => alert("共有URLをコピーしました！これを送れば中身が再現されます。"));
+            navigator.clipboard.writeText(url).then(() => alert("このURLを友達に送ってください！"));
         }
 
         init();
