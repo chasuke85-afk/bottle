@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bottle Customizer</title>
+    <style>
+        :root { --bg: #fff5f7; --accent: #ff85a2; }
+        body { font-family: sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        h1 { color: #555; font-size: 1.2rem; }
+        .container { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; max-width: 800px; }
+        .bottle-card { background: white; border-radius: 15px; padding: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 120px; text-align: center; position: relative; }
+        .bottle { width: 60px; height: 100px; border: 3px solid #555; border-radius: 5px 5px 20px 20px; margin: 10px auto; position: relative; overflow: hidden; background: #eee; cursor: pointer; }
+        .liquid { position: absolute; bottom: 0; width: 100%; transition: height 0.3s ease; }
+        input[type="text"] { width: 90%; border: none; border-bottom: 2px solid #ddd; text-align: center; outline: none; margin-bottom: 5px; }
+        input[type="color"] { border: none; width: 30px; height: 30px; cursor: pointer; background: none; }
+        .controls { margin-top: 30px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        button { padding: 10px 20px; border: none; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-add { background: var(--accent); color: white; }
+        .btn-share { background: #555; color: white; }
+        .remove-btn { position: absolute; top: 2px; right: 5px; color: #ccc; cursor: pointer; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+    <h1>🍾 性癖瓶（URL共有対応版）</h1>
+    <div class="container" id="bottleContainer"></div>
+
+    <div class="controls">
+        <button class="btn-add" onclick="addBottle()">項目を追加</button>
+        <button class="btn-share" onclick="generateShareURL()">共有URLをコピー</button>
+    </div>
+
+    <script>
+        let bottles = [];
+
+        // URLからデータを読み込み
+        function init() {
+            const params = new URLSearchParams(window.location.search).get('d');
+            if (params) {
+                try {
+                    bottles = JSON.parse(decodeURIComponent(escape(atob(params))));
+                } catch (e) { console.error("データ読み込み失敗"); }
+            }
+            if (bottles.length === 0) {
+                bottles = [{ name: '首筋', color: '#ffadad', level: 50 }, { name: '太もも', color: '#ffd6a5', level: 30 }];
+            }
+            render();
+        }
+
+        function render() {
+            const container = document.getElementById('bottleContainer');
+            container.innerHTML = '';
+            bottles.forEach((b, i) => {
+                const card = document.createElement('div');
+                card.className = 'bottle-card';
+                card.innerHTML = `
+                    <span class="remove-btn" onclick="removeBottle(${i})">✖</span>
+                    <input type="text" value="${b.name}" onchange="updateName(${i}, this.value)">
+                    <div class="bottle" onclick="fillLiquid(${i}, event)">
+                        <div class="liquid" style="height: ${b.level}%; background: ${b.color}; shadow: inset 0 0 10px rgba(0,0,0,0.1);"></div>
+                    </div>
+                    <input type="color" value="${b.color}" onchange="updateColor(${i}, this.value)">
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function addBottle() { bottles.push({ name: '新項目', color: '#a0c4ff', level: 0 }); render(); }
+        function removeBottle(i) { bottles.splice(i, 1); render(); }
+        function updateName(i, val) { bottles[i].name = val; }
+        function updateColor(i, val) { bottles[i].color = val; render(); }
+        function fillLiquid(i, e) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const y = e.clientY - rect.top;
+            bottles[i].level = Math.max(0, Math.min(100, Math.round(100 - (y / rect.height * 100))));
+            render();
+        }
+
+        function generateShareURL() {
+            const data = btoa(unescape(encodeURIComponent(JSON.stringify(bottles))));
+            const url = window.location.origin + window.location.pathname + '?d=' + data;
+            navigator.clipboard.writeText(url).then(() => alert("共有URLをコピーしました！これを送れば中身が再現されます。"));
+        }
+
+        init();
+    </script>
+</body>
+</html>
