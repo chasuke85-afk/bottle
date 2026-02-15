@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>性癖瓶 Ver.6.1</title>
+    <title>性癖瓶 Ver.7.0</title>
     <style>
         :root { --bg: #fdfbfb; --accent: #ff4d79; --rule-color: #e63946; }
         
@@ -24,7 +24,7 @@
         .container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; max-width: 900px; }
         @media (min-width: 600px) { .container { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; } }
 
-        .bottle-card { background: white; border-radius: 15px; padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; position: relative; transition: 0.3s; overflow: hidden; }
+        .bottle-card { background: white; border-radius: 15px; padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; position: relative; transition: 0.3s; }
         .bottle-card.locked { pointer-events: none; }
         .lock-btn { position: absolute; top: 8px; right: 8px; cursor: pointer; font-size: 1.2rem; color: #ccc; z-index: 10; pointer-events: auto !important; }
         
@@ -32,7 +32,7 @@
         input[type="text"]:disabled { color: #333 !important; opacity: 1; }
 
         .bottle-frame { width: 60px; height: 90px; border: 3px solid #333; border-radius: 2px 2px 20px 20px; margin: 15px auto; position: relative; overflow: hidden; background: #f0f0f0; }
-        .liquid { position: absolute; bottom: 0; width: 100%; transition: height 0.1s linear; transform-origin: top center; }
+        .liquid { position: absolute; bottom: 0; width: 100%; transition: height 0.1s linear; }
         .cap { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 40px; height: 12px; background: #444; border-radius: 3px; transition: 0.3s; z-index: 5; }
         .locked .cap { top: 3px; }
 
@@ -40,47 +40,20 @@
         input[type="range"] { width: 100%; cursor: pointer; accent-color: #666; pointer-events: auto !important; }
         .locked input[type="range"] { pointer-events: none !important; opacity: 0.5; }
 
-        .controls { margin: 30px 0 50px 0; display: flex; gap: 10px; }
+        .controls { margin: 30px 0 10px 0; display: flex; gap: 10px; }
         .main-btn { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; background: #333; color: white; }
 
-        /* 水面の揺れアニメーション：全体は動かさず、歪ませる */
-        @keyframes liquidSway {
-            0% { transform: scaleY(1) skewX(0deg); }
-            25% { transform: scaleY(1.05) skewX(2deg); }
-            50% { transform: scaleY(0.95) skewX(-2deg); }
-            75% { transform: scaleY(1.02) skewX(1deg); }
-            100% { transform: scaleY(1) skewX(0deg); }
-        }
+        /* プリセットエリア */
+        .preset-area { margin-bottom: 50px; text-align: center; width: 90%; max-width: 500px; }
+        .preset-title { font-size: 0.7rem; color: #aaa; margin-bottom: 8px; font-weight: bold; }
+        .preset-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+        .preset-btn { padding: 5px 12px; background: #f0f0f0; border-radius: 15px; font-size: 0.75rem; color: #666; cursor: pointer; border: 1px solid #e0e0e0; transition: 0.2s; }
+        .preset-btn:hover { background: #e0e0e0; }
 
-        .bubble {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 50%;
-            box-shadow: 0 0 2px white;
-            pointer-events: none;
-        }
-        @keyframes bubbleUp {
-            0% { transform: translateY(0); opacity: 0; }
-            20% { opacity: 0.6; }
-            100% { transform: translateY(-70px); opacity: 0; }
-        }
-
-        .wave {
-            position: absolute;
-            top: -4px;
-            left: 0;
-            width: 200%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 40%;
-            animation: waveFlow 3s linear infinite;
-        }
-        @keyframes waveFlow {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
-        }
+        .bubble { position: absolute; width: 4px; height: 4px; background: rgba(255, 255, 255, 0.5); border-radius: 50%; pointer-events: none; }
+        @keyframes bubbleUp { 0% { transform: translateY(0); opacity: 0; } 20% { opacity: 0.5; } 100% { transform: translateY(-70px); opacity: 0; } }
+        .wave { position: absolute; top: -3px; left: 0; width: 200%; height: 6px; background: rgba(255, 255, 255, 0.2); border-radius: 40%; animation: waveFlow 4s linear infinite; }
+        @keyframes waveFlow { from { transform: translateX(0); } to { transform: translateX(-50%); } }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -95,17 +68,30 @@
         </div>
         <div class="usage-notes">
             ・<strong>操作:</strong> ＋ボタン長押しで注ぎ、ーで減らします。<br>
-            ・<strong>濃度:</strong> スライダーで「本気度」を表現（気泡が昇ります）。<br>
-            ・<strong>ロック:</strong> 右上の 🔓 を押すと蓋が閉まり固定されます。<br>
-            <span class="warning-note">⚠️ 注意：音が出ます。</span>
+            ・<strong>濃度:</strong> スライダーで「本気度」を調節します。<br>
+            ・<strong>クイック追加:</strong> 下のプリセットから項目を即時追加できます。
         </div>
     </div>
 
     <div class="container" id="bottleContainer"></div>
 
     <div class="controls">
-        <button class="main-btn" style="background:var(--accent)" onclick="addBottle()">項目追加</button>
+        <button class="main-btn" style="background:var(--accent)" onclick="addBottle()">自由に追加</button>
         <button class="main-btn" onclick="generateShareURL()">URLをコピー</button>
+    </div>
+
+    <div class="preset-area">
+        <div class="preset-title">クイック項目追加（プリセット）</div>
+        <div class="preset-group">
+            <div class="preset-btn" onclick="addPresetBottle('首筋')">首筋</div>
+            <div class="preset-btn" onclick="addPresetBottle('鎖骨')">鎖骨</div>
+            <div class="preset-btn" onclick="addPresetBottle('独占欲')">独占欲</div>
+            <div class="preset-btn" onclick="addPresetBottle('執着')">執着</div>
+            <div class="preset-btn" onclick="addPresetBottle('放置')">放置</div>
+            <div class="preset-btn" onclick="addPresetBottle('共依存')">共依存</div>
+            <div class="preset-btn" onclick="addPresetBottle('体格差')">体格差</div>
+            <div class="preset-btn" onclick="addPresetBottle('ギャップ')">ギャップ</div>
+        </div>
     </div>
 
     <script>
@@ -121,7 +107,7 @@
             const osc = audioCtx.createOscillator(); 
             const gain = audioCtx.createGain(); 
             osc.type = 'sine'; 
-            osc.frequency.setValueAtTime(150 + Math.random()*20, audioCtx.currentTime); 
+            osc.frequency.setValueAtTime(150 + Math.random()*15, audioCtx.currentTime); 
             gain.gain.setValueAtTime(0.02, audioCtx.currentTime); 
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05); 
             osc.connect(gain); gain.connect(audioCtx.destination); 
@@ -157,10 +143,10 @@
                 
                 let bubblesHTML = '';
                 if (b.level > 5) {
-                    for(let j=0; j<4; j++) {
+                    for(let j=0; j<3; j++) {
                         const left = Math.random() * 80 + 10;
                         const delay = Math.random() * 4;
-                        const duration = 2 + Math.random() * 3;
+                        const duration = 3 + Math.random() * 2;
                         bubblesHTML += `<div class="bubble" style="left:${left}%; bottom:0; animation: bubbleUp ${duration}s linear ${delay}s infinite;"></div>`;
                     }
                 }
@@ -179,9 +165,9 @@
                         </div>
                     </div>
                     <div class="pour-controls">
-                        <button class="p-btn" onmousedown="startPress(${i},-2)" onmouseup="stopPress(${i})" ontouchstart="startPress(${i},-2)" ontouchend="stopPress(${i})">ー</button>
+                        <button class="p-btn" onmousedown="startPress(${i},-2)" onmouseup="stopPress()" ontouchstart="startPress(${i},-2)" ontouchend="stopPress()">ー</button>
                         <span style="font-size:0.7rem;font-weight:bold">${b.level}%</span>
-                        <button class="p-btn" onmousedown="startPress(${i},2)" onmouseup="stopPress(${i})" ontouchstart="startPress(${i},2)" ontouchend="stopPress(${i})">＋</button>
+                        <button class="p-btn" onmousedown="startPress(${i},2)" onmouseup="stopPress()" ontouchstart="startPress(${i},2)" ontouchend="stopPress()">＋</button>
                     </div>
                     <input type="range" min="0.05" max="1" step="0.01" value="${b.alpha}" oninput="updateAlpha(${i},this.value)">
                     <div style="font-size:0.6rem;color:#ccc;margin-top:8px;cursor:pointer;pointer-events:auto;" onclick="removeBottle(${i})">削除</div>`;
@@ -194,44 +180,26 @@
             if (bottles[i].locked) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
             if (pressInterval) return;
-            
-            const liq = document.getElementById(`liquid-${i}`);
-            if(liq) liq.style.animation = 'none';
-
             pressInterval = setInterval(() => {
                 let old = bottles[i].level;
                 bottles[i].level = Math.max(0, Math.min(100, bottles[i].level + diff));
                 if (old !== bottles[i].level) {
                     playPourSound();
-                    const liqUpdate = document.getElementById(`liquid-${i}`);
-                    const span = liqUpdate.closest('.bottle-card').querySelector('.pour-controls span');
-                    if(liqUpdate) liqUpdate.style.height = bottles[i].level + '%';
+                    const liq = document.getElementById(`liquid-${i}`);
+                    const span = liq.closest('.bottle-card').querySelector('.pour-controls span');
+                    if(liq) liq.style.height = bottles[i].level + '%';
                     if(span) span.innerText = bottles[i].level + '%';
                 }
-                if (bottles[i].level === 100 || bottles[i].level === 0) stopPress(i);
+                if (bottles[i].level === 100 || bottles[i].level === 0) stopPress();
             }, 60);
         }
 
-        function stopPress(i) {
-            if (pressInterval) {
-                clearInterval(pressInterval);
-                pressInterval = null;
-                playFinishSound();
-                
-                const liq = document.getElementById(`liquid-${i}`);
-                if(liq && bottles[i].level > 0 && bottles[i].level < 100) {
-                    // 水面だけが「チャプン」と揺れるアニメーションを適用
-                    liq.style.animation = 'liquidSway 0.6s ease-in-out';
-                }
-                // アニメーション完了後に描画を整える
-                setTimeout(() => render(), 600);
-            }
-        }
-
+        function stopPress() { if (pressInterval) { clearInterval(pressInterval); pressInterval = null; playFinishSound(); render(); } }
         function toggleLock(i) { bottles[i].locked = !bottles[i].locked; render(); }
         function updateColor(i, color) { if(!bottles[i].locked){ bottles[i].color = color; render(); } }
         function updateAlpha(i, val) { bottles[i].alpha = parseFloat(val); render(); }
         function addBottle() { bottles.push({ name: '新項目', color: PRESET_COLORS[0], level: 0, alpha: 0.8, locked: false }); render(); }
+        function addPresetBottle(name) { bottles.push({ name: name, color: PRESET_COLORS[0], level: 0, alpha: 0.8, locked: false }); render(); }
         function removeBottle(i) { bottles.splice(i, 1); render(); }
         function generateShareURL() { const data = btoa(unescape(encodeURIComponent(JSON.stringify(bottles)))); const url = window.location.origin + window.location.pathname + '?d=' + data; navigator.clipboard.writeText(url).then(() => alert("URLをコピーしました！")); }
         init();
