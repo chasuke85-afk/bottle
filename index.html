@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>性癖瓶 Ver.7.0</title>
+    <title>性癖瓶 Ver.7.1</title>
     <style>
         :root { --bg: #fdfbfb; --accent: #ff4d79; --rule-color: #e63946; }
         
@@ -19,7 +19,6 @@
         .guide-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: bold; }
         .color-chip { width: 18px; height: 18px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); }
         .usage-notes { font-size: 0.75rem; color: #666; border-top: 1px solid #eee; padding-top: 10px; line-height: 1.4; }
-        .warning-note { color: var(--rule-color); font-weight: bold; margin-top: 8px; display: block; }
 
         .container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; max-width: 900px; }
         @media (min-width: 600px) { .container { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; } }
@@ -40,15 +39,18 @@
         input[type="range"] { width: 100%; cursor: pointer; accent-color: #666; pointer-events: auto !important; }
         .locked input[type="range"] { pointer-events: none !important; opacity: 0.5; }
 
-        .controls { margin: 30px 0 10px 0; display: flex; gap: 10px; }
+        .controls { margin: 30px 0 0 0; display: flex; gap: 10px; }
         .main-btn { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; background: #333; color: white; }
 
-        /* プリセットエリア */
-        .preset-area { margin-bottom: 50px; text-align: center; width: 90%; max-width: 500px; }
-        .preset-title { font-size: 0.7rem; color: #aaa; margin-bottom: 8px; font-weight: bold; }
+        /* プリセットエリアの強化 */
+        .preset-container { margin: 40px 0 60px 0; width: 90%; max-width: 500px; background: rgba(255,255,255,0.5); padding: 20px; border-radius: 20px; }
+        .preset-category { margin-bottom: 20px; }
+        .preset-label { font-size: 0.75rem; color: #888; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold; }
+        .preset-label::before, .preset-label::after { content: ""; height: 1px; flex-grow: 1; background: #ddd; }
+        
         .preset-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-        .preset-btn { padding: 5px 12px; background: #f0f0f0; border-radius: 15px; font-size: 0.75rem; color: #666; cursor: pointer; border: 1px solid #e0e0e0; transition: 0.2s; }
-        .preset-btn:hover { background: #e0e0e0; }
+        .preset-btn { padding: 6px 14px; background: #fff; border-radius: 18px; font-size: 0.75rem; color: #555; cursor: pointer; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.03); transition: 0.2s; }
+        .preset-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
 
         .bubble { position: absolute; width: 4px; height: 4px; background: rgba(255, 255, 255, 0.5); border-radius: 50%; pointer-events: none; }
         @keyframes bubbleUp { 0% { transform: translateY(0); opacity: 0; } 20% { opacity: 0.5; } 100% { transform: translateY(-70px); opacity: 0; } }
@@ -68,8 +70,7 @@
         </div>
         <div class="usage-notes">
             ・<strong>操作:</strong> ＋ボタン長押しで注ぎ、ーで減らします。<br>
-            ・<strong>濃度:</strong> スライダーで「本気度」を調節します。<br>
-            ・<strong>クイック追加:</strong> 下のプリセットから項目を即時追加できます。
+            ・<strong>クイック追加:</strong> 下のカテゴリから項目を選んで即時追加。
         </div>
     </div>
 
@@ -80,17 +81,38 @@
         <button class="main-btn" onclick="generateShareURL()">URLをコピー</button>
     </div>
 
-    <div class="preset-area">
-        <div class="preset-title">クイック項目追加（プリセット）</div>
-        <div class="preset-group">
-            <div class="preset-btn" onclick="addPresetBottle('首筋')">首筋</div>
-            <div class="preset-btn" onclick="addPresetBottle('鎖骨')">鎖骨</div>
-            <div class="preset-btn" onclick="addPresetBottle('独占欲')">独占欲</div>
-            <div class="preset-btn" onclick="addPresetBottle('執着')">執着</div>
-            <div class="preset-btn" onclick="addPresetBottle('放置')">放置</div>
-            <div class="preset-btn" onclick="addPresetBottle('共依存')">共依存</div>
-            <div class="preset-btn" onclick="addPresetBottle('体格差')">体格差</div>
-            <div class="preset-btn" onclick="addPresetBottle('ギャップ')">ギャップ</div>
+    <div class="preset-container">
+        <div class="preset-category">
+            <div class="preset-label">部位・身体</div>
+            <div class="preset-group">
+                <div class="preset-btn" onclick="addPresetBottle('首筋')">首筋</div>
+                <div class="preset-btn" onclick="addPresetBottle('鎖骨')">鎖骨</div>
+                <div class="preset-btn" onclick="addPresetBottle('指先')">指先</div>
+                <div class="preset-btn" onclick="addPresetBottle('うなじ')">うなじ</div>
+                <div class="preset-btn" onclick="addPresetBottle('背中')">背中</div>
+            </div>
+        </div>
+
+        <div class="preset-category">
+            <div class="preset-label">関係・シチュ</div>
+            <div class="preset-group">
+                <div class="preset-btn" onclick="addPresetBottle('執着')">執着</div>
+                <div class="preset-btn" onclick="addPresetBottle('共依存')">共依存</div>
+                <div class="preset-btn" onclick="addPresetBottle('体格差')">体格差</div>
+                <div class="preset-btn" onclick="addPresetBottle('主従')">主従</div>
+                <div class="preset-btn" onclick="addPresetBottle('密室')">密室</div>
+            </div>
+        </div>
+
+        <div class="preset-category">
+            <div class="preset-label">性向・属性</div>
+            <div class="preset-group">
+                <div class="preset-btn" onclick="addPresetBottle('独占欲')">独占欲</div>
+                <div class="preset-btn" onclick="addPresetBottle('放置')">放置</div>
+                <div class="preset-btn" onclick="addPresetBottle('ギャップ')">ギャップ</div>
+                <div class="preset-btn" onclick="addPresetBottle('嫉妬')">嫉妬</div>
+                <div class="preset-btn" onclick="addPresetBottle('背徳感')">背徳感</div>
+            </div>
         </div>
     </div>
 
