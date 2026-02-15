@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>性癖瓶 Ver.6.0</title>
+    <title>性癖瓶 Ver.6.1</title>
     <style>
         :root { --bg: #fdfbfb; --accent: #ff4d79; --rule-color: #e63946; }
         
@@ -31,8 +31,8 @@
         input[type="text"] { width: 80%; border: none; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; margin-bottom: 8px; font-size: 0.8rem; background: transparent; color: #333 !important; }
         input[type="text"]:disabled { color: #333 !important; opacity: 1; }
 
-        .bottle-frame { width: 60px; height: 90px; border: 3px solid #333; border-radius: 2px 2px 20px 20px; margin: 15px auto; position: relative; overflow: hidden; background: #f0f0f0; transform-origin: bottom center; }
-        .liquid { position: absolute; bottom: 0; width: 100%; transition: height 0.1s linear; transform-origin: bottom center; }
+        .bottle-frame { width: 60px; height: 90px; border: 3px solid #333; border-radius: 2px 2px 20px 20px; margin: 15px auto; position: relative; overflow: hidden; background: #f0f0f0; }
+        .liquid { position: absolute; bottom: 0; width: 100%; transition: height 0.1s linear; transform-origin: top center; }
         .cap { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 40px; height: 12px; background: #444; border-radius: 3px; transition: 0.3s; z-index: 5; }
         .locked .cap { top: 3px; }
 
@@ -43,16 +43,15 @@
         .controls { margin: 30px 0 50px 0; display: flex; gap: 10px; }
         .main-btn { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; background: #333; color: white; }
 
-        /* 揺れアニメーション */
+        /* 水面の揺れアニメーション：全体は動かさず、歪ませる */
         @keyframes liquidSway {
-            0% { transform: rotate(0deg); }
-            20% { transform: rotate(4deg); }
-            50% { transform: rotate(-3deg); }
-            80% { transform: rotate(1deg); }
-            100% { transform: rotate(0deg); }
+            0% { transform: scaleY(1) skewX(0deg); }
+            25% { transform: scaleY(1.05) skewX(2deg); }
+            50% { transform: scaleY(0.95) skewX(-2deg); }
+            75% { transform: scaleY(1.02) skewX(1deg); }
+            100% { transform: scaleY(1) skewX(0deg); }
         }
 
-        /* 気泡アニメーション */
         .bubble {
             position: absolute;
             width: 4px;
@@ -68,15 +67,14 @@
             100% { transform: translateY(-70px); opacity: 0; }
         }
 
-        /* 波打ちエフェクト */
         .wave {
             position: absolute;
-            top: -3px;
+            top: -4px;
             left: 0;
             width: 200%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 35%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 40%;
             animation: waveFlow 3s linear infinite;
         }
         @keyframes waveFlow {
@@ -174,7 +172,7 @@
                     <div class="color-selector" style="display:flex;justify-content:center;gap:5px;margin-bottom:8px;">
                         ${PRESET_COLORS.map(c => `<div class="c-btn" style="width:18px;height:18px;border-radius:50%;cursor:pointer;background:${c};border:${b.color===c?'2px solid #333':'2px solid transparent'}" onclick="updateColor(${i},'${c}')"></div>`).join('')}
                     </div>
-                    <div class="bottle-frame" id="frame-${i}">
+                    <div class="bottle-frame">
                         <div id="liquid-${i}" class="liquid" style="height:${b.level}%; background:${b.color}; opacity:${b.alpha};">
                             <div class="wave"></div>
                             ${bubblesHTML}
@@ -197,17 +195,17 @@
             if (audioCtx.state === 'suspended') audioCtx.resume();
             if (pressInterval) return;
             
-            const frame = document.getElementById(`frame-${i}`);
-            if(frame) frame.style.animation = 'none';
+            const liq = document.getElementById(`liquid-${i}`);
+            if(liq) liq.style.animation = 'none';
 
             pressInterval = setInterval(() => {
                 let old = bottles[i].level;
                 bottles[i].level = Math.max(0, Math.min(100, bottles[i].level + diff));
                 if (old !== bottles[i].level) {
                     playPourSound();
-                    const liq = document.getElementById(`liquid-${i}`);
-                    const span = liq.closest('.bottle-card').querySelector('.pour-controls span');
-                    if(liq) liq.style.height = bottles[i].level + '%';
+                    const liqUpdate = document.getElementById(`liquid-${i}`);
+                    const span = liqUpdate.closest('.bottle-card').querySelector('.pour-controls span');
+                    if(liqUpdate) liqUpdate.style.height = bottles[i].level + '%';
                     if(span) span.innerText = bottles[i].level + '%';
                 }
                 if (bottles[i].level === 100 || bottles[i].level === 0) stopPress(i);
@@ -220,11 +218,13 @@
                 pressInterval = null;
                 playFinishSound();
                 
-                const frame = document.getElementById(`frame-${i}`);
-                if(frame && bottles[i].level > 0) {
-                    frame.style.animation = 'liquidSway 0.8s ease-in-out';
+                const liq = document.getElementById(`liquid-${i}`);
+                if(liq && bottles[i].level > 0 && bottles[i].level < 100) {
+                    // 水面だけが「チャプン」と揺れるアニメーションを適用
+                    liq.style.animation = 'liquidSway 0.6s ease-in-out';
                 }
-                setTimeout(() => render(), 800);
+                // アニメーション完了後に描画を整える
+                setTimeout(() => render(), 600);
             }
         }
 
