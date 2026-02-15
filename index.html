@@ -2,47 +2,80 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>性癖瓶 Ver.3.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>性癖瓶 Ver.4.0</title>
     <style>
-        :root { --bg: #fdfbfb; --accent: #ff4d79; }
-        body { font-family: sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 20px; color: #444; }
-        .container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 900px; }
-        .bottle-card { background: white; border-radius: 20px; padding: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.08); width: 150px; text-align: center; }
+        :root { --bg: #fdfbfb; --accent: #ff4d79; --rule-color: #e63946; }
+        body { font-family: sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 15px; color: #444; margin: 0; }
         
-        .bottle-frame { width: 70px; height: 110px; border: 3px solid #333; border-radius: 8px 8px 25px 25px; margin: 10px auto; position: relative; overflow: hidden; background: #f0f0f0; }
+                /* ルール説明枠のスタイル */
+        .rule-box { border: 2px solid var(--rule-color); background: #fff5f5; border-radius: 12px; padding: 15px; margin-bottom: 25px; max-width: 500px; width: 90%; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .rule-box h2 { margin: 0 0 12px 0; font-size: 1rem; color: var(--rule-color); text-align: center; border-bottom: 1px dashed var(--rule-color); padding-bottom: 5px; }
+        
+        .color-guide { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+        .guide-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: bold; }
+        .color-chip { width: 18px; height: 18px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); }
+        
+        .usage-notes { font-size: 0.75rem; color: #666; border-top: 1px solid #eee; pt: 10px; padding-top: 10px; line-height: 1.4; }
+        /* コンテナ（スマホで2カラム） */
+        .container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; max-width: 900px; }
+        @media (min-width: 600px) { .container { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; } }
+
+        .bottle-card { background: white; border-radius: 15px; padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; position: relative; }
+        
+        /* 瓶のデザイン */
+        .bottle-frame { width: 60px; height: 90px; border: 3px solid #333; border-radius: 6px 6px 20px 20px; margin: 10px auto; position: relative; overflow: hidden; background: #f0f0f0; }
         .liquid { position: absolute; bottom: 0; width: 100%; transition: height 0.1s linear; }
         
-        .color-selector { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
-        .c-btn { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
-        .c-btn.active { border-color: #333; transform: scale(1.2); }
+        /* 色・操作系 */
+        .color-selector { display: flex; justify-content: center; gap: 5px; margin-bottom: 8px; }
+        .c-btn { width: 18px; height: 18px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+        .c-btn.active { border-color: #333; transform: scale(1.1); }
 
-        .pour-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .p-btn { width: 40px; height: 40px; border-radius: 50%; border: none; background: #eee; cursor: pointer; font-size: 1.2rem; user-select: none; -webkit-tap-highlight-color: transparent; }
-        .p-btn:active { background: #ddd; }
+        .pour-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .p-btn { 
+            width: 35px; height: 35px; border-radius: 50%; border: none; background: #eee; cursor: pointer; font-size: 1.2rem; 
+            user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; /* 長押しコピー防止 */
+        }
         
-        .slider-label { font-size: 0.7rem; color: #888; margin-top: 5px; display: block; }
-        input[type="range"] { width: 100%; cursor: pointer; accent-color: #666; }
-        input[type="text"] { width: 100%; border: none; border-bottom: 2px solid #eee; text-align: center; font-weight: bold; margin-bottom: 10px; }
+        /* 滑らかなスライダー */
+        input[type="range"] { width: 100%; cursor: pointer; accent-color: #666; margin: 0; }
+        input[type="text"] { width: 90%; border: none; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; margin-bottom: 8px; font-size: 0.8rem; }
         
-        .controls { margin-top: 40px; display: flex; gap: 15px; }
-        .main-btn { padding: 12px 25px; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; background: #333; color: white; }
+        .controls { margin-top: 30px; display: flex; gap: 10px; padding-bottom: 40px; }
+        .main-btn { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; background: #333; color: white; font-size: 0.9rem; }
+        .remove-txt { font-size: 0.6rem; color: #ccc; margin-top: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <h1>🍾 性癖瓶 3.0</h1>
-    <p style="font-size: 0.8rem; margin-bottom: 20px;">長押しで注ぐ。スライダーで濃度を調整。</p>
+       <div class="rule-box">
+        <h2>◀︎性癖瓶のルール▶︎</h2>
+        
+        <div class="color-guide">
+            <div class="guide-item">
+                <div class="color-chip" style="background: #ff5d8f;"></div>
+                <span>ピンク：好き / 執着している</span>
+            </div>
+            <div class="guide-item">
+                <div class="color-chip" style="background: #94a3b8;"></div>
+                <span>グレー：無関心 / そこまで好きじゃない</span>
+            </div>
+            <div class="guide-item">
+                <div class="color-chip" style="background: #6366f1;"></div>
+                <span>青色：嫌い / 苦手・地雷</span>
+            </div>
+        </div>
 
-    <div class="container" id="bottleContainer"></div>
-
-    <div class="controls">
-        <button class="main-btn" style="background:var(--accent)" onclick="addBottle()">項目を追加</button>
-        <button class="main-btn" onclick="generateShareURL()">共有URLをコピー</button>
+        <div class="usage-notes">
+            ・<strong>操作:</strong> ＋ボタン長押しで注ぎ、ーで減らします。<br>
+            ・<strong>濃度:</strong> スライダーで「本気度」を表現してください。<br>
+            ・<strong>共有:</strong> 完成したら下のボタンでURLを発行！
+        </div>
     </div>
 
+
     <script>
-        // 好き、嫌い、どっちでも
         const PRESET_COLORS = ['#ff5d8f', '#94a3b8', '#6366f1'];
         let bottles = [];
         let pressInterval = null;
@@ -69,23 +102,20 @@
                 card.innerHTML = `
                     <input type="text" value="${b.name}" onchange="bottles[${i}].name=this.value">
                     <div class="color-selector">
-                        ${PRESET_COLORS.map((c, idx) => `
-                            <div class="c-btn ${b.color === c ? 'active' : ''}" 
-                                 style="background:${c}" 
-                                 onclick="updateColor(${i}, '${c}')"></div>
+                        ${PRESET_COLORS.map(c => `
+                            <div class="c-btn ${b.color === c ? 'active' : ''}" style="background:${c}" onclick="updateColor(${i}, '${c}')"></div>
                         `).join('')}
                     </div>
                     <div class="bottle-frame">
-                        <div class="liquid" style="height: ${b.level}%; background: ${b.color}; opacity: ${b.alpha}; shadow: inset 0 0 10px rgba(0,0,0,0.1);"></div>
+                        <div class="liquid" style="height: ${b.level}%; background: ${b.color}; opacity: ${b.alpha};"></div>
                     </div>
                     <div class="pour-controls">
-                        <button class="p-btn" onmousedown="startPress(${i},-2)" onmouseup="stopPress()" onmouseleave="stopPress()" ontouchstart="startPress(${i},-2)" ontouchend="stopPress()">ー</button>
-                        <span style="font-size:0.8rem; font-weight:bold">${b.level}%</span>
-                        <button class="p-btn" onmousedown="startPress(${i},2)" onmouseup="stopPress()" onmouseleave="stopPress()" ontouchstart="startPress(${i},2)" ontouchend="stopPress()">＋</button>
+                        <button class="p-btn" oncontextmenu="return false;" onmousedown="startPress(${i},-2)" onmouseup="stopPress()" ontouchstart="startPress(${i},-2)" ontouchend="stopPress()">ー</button>
+                        <span style="font-size:0.7rem; font-weight:bold">${b.level}%</span>
+                        <button class="p-btn" oncontextmenu="return false;" onmousedown="startPress(${i},2)" onmouseup="stopPress()" ontouchstart="startPress(${i},2)" ontouchend="stopPress()">＋</button>
                     </div>
-                    <label class="slider-label">濃度（純度）</label>
-                    <input type="range" min="0.1" max="1" step="0.05" value="${b.alpha}" oninput="updateAlpha(${i}, this.value)">
-                    <div style="font-size:0.6rem; color:#ccc; margin-top:15px; cursor:pointer" onclick="removeBottle(${i})">削除する</div>
+                    <input type="range" min="0.05" max="1" step="0.01" value="${b.alpha}" oninput="updateAlpha(${i}, this.value)">
+                    <div class="remove-txt" onclick="removeBottle(${i})">削除</div>
                 `;
                 container.appendChild(card);
             });
@@ -96,14 +126,10 @@
             pressInterval = setInterval(() => {
                 bottles[i].level = Math.max(0, Math.min(100, bottles[i].level + diff));
                 render();
-            }, 50);
+            }, 40);
         }
 
-        function stopPress() {
-            clearInterval(pressInterval);
-            pressInterval = null;
-        }
-
+        function stopPress() { clearInterval(pressInterval); pressInterval = null; }
         function updateColor(i, color) { bottles[i].color = color; render(); }
         function updateAlpha(i, val) { bottles[i].alpha = parseFloat(val); render(); }
         function addBottle() { bottles.push({ name: '新項目', color: PRESET_COLORS[0], level: 0, alpha: 0.8 }); render(); }
@@ -112,7 +138,7 @@
         function generateShareURL() {
             const data = btoa(unescape(encodeURIComponent(JSON.stringify(bottles))));
             const url = window.location.origin + window.location.pathname + '?d=' + data;
-            navigator.clipboard.writeText(url).then(() => alert("このURLを友達に送ってください！"));
+            navigator.clipboard.writeText(url).then(() => alert("共有用URLをコピーしました！"));
         }
 
         init();
