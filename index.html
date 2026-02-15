@@ -3,23 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>性癖瓶 Ver.5.1</title>
+    <title>性癖瓶 Ver.6.0</title>
     <style>
         :root { --bg: #fdfbfb; --accent: #ff4d79; --rule-color: #e63946; }
         
-        /* 全体で長押しコピー・選択を禁止（スマホ対策） */
-        * { 
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-        /* 入力欄だけは触れるようにする */
+        * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
         input[type="text"] { -webkit-user-select: text; user-select: text; }
 
         body { font-family: sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 15px; color: #444; margin: 0; }
         .main-title { font-size: 1.8rem; font-weight: bold; margin: 20px 0 10px 0; color: #333; letter-spacing: 3px; }
 
-        /* ルール説明枠 */
         .rule-box { border: 2px solid var(--rule-color); background: #fff5f5; border-radius: 12px; padding: 15px; margin-bottom: 25px; max-width: 500px; width: 90%; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .rule-box h2 { margin: 0 0 12px 0; font-size: 1rem; color: var(--rule-color); text-align: center; border-bottom: 1px dashed var(--rule-color); padding-bottom: 5px; }
         .color-guide { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
@@ -31,31 +24,32 @@
         .container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; max-width: 900px; }
         @media (min-width: 600px) { .container { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; } }
 
-        .bottle-card { background: white; border-radius: 15px; padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; position: relative; transition: 0.3s; }
-        /* ロック中も不透明度は下げず、操作だけ無効にする */
+        .bottle-card { background: white; border-radius: 15px; padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; position: relative; transition: 0.3s; overflow: hidden; }
         .bottle-card.locked { pointer-events: none; }
         .lock-btn { position: absolute; top: 8px; right: 8px; cursor: pointer; font-size: 1.2rem; color: #ccc; z-index: 10; pointer-events: auto !important; }
         
-        /* 名前はロック中でも黒く、入力不可にするだけ */
         input[type="text"] { width: 80%; border: none; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; margin-bottom: 8px; font-size: 0.8rem; background: transparent; color: #333 !important; }
         input[type="text"]:disabled { color: #333 !important; opacity: 1; }
 
-        .bottle-frame { width: 60px; height: 90px; border: 3px solid #333; border-radius: 2px 2px 20px 20px; margin: 15px auto; position: relative; overflow: hidden; background: #f0f0f0; }
-        .liquid { position: absolute; bottom: 0; width: 100%; transition: height 0.1s linear; }
+        .bottle-frame { width: 60px; height: 90px; border: 3px solid #333; border-radius: 2px 2px 20px 20px; margin: 15px auto; position: relative; overflow: hidden; background: #f0f0f0; transform-origin: bottom center; }
+        .liquid { position: absolute; bottom: 0; width: 100%; transition: height 0.1s linear; transform-origin: bottom center; }
         .cap { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 40px; height: 12px; background: #444; border-radius: 3px; transition: 0.3s; z-index: 5; }
         .locked .cap { top: 3px; }
 
         .p-btn { width: 35px; height: 35px; border-radius: 50%; border: none; background: #eee; cursor: pointer; font-size: 1.2rem; }
-        input[type="range"] { width: 100%; cursor: pointer; accent-color: #666; }
+        input[type="range"] { width: 100%; cursor: pointer; accent-color: #666; pointer-events: auto !important; }
+        .locked input[type="range"] { pointer-events: none !important; opacity: 0.5; }
+
         .controls { margin: 30px 0 50px 0; display: flex; gap: 10px; }
         .main-btn { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; background: #333; color: white; }
-　　　　　/* 揺れアニメーション */
+
+        /* 揺れアニメーション */
         @keyframes liquidSway {
-            0% { transform: rotate(0deg) scaleY(1); }
-            20% { transform: rotate(3deg) scaleY(1.05); }
-            50% { transform: rotate(-2deg) scaleY(0.95); }
-            80% { transform: rotate(1deg) scaleY(1.02); }
-            100% { transform: rotate(0deg) scaleY(1); }
+            0% { transform: rotate(0deg); }
+            20% { transform: rotate(4deg); }
+            50% { transform: rotate(-3deg); }
+            80% { transform: rotate(1deg); }
+            100% { transform: rotate(0deg); }
         }
 
         /* 気泡アニメーション */
@@ -63,35 +57,36 @@
             position: absolute;
             width: 4px;
             height: 4px;
-            background: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.6);
             border-radius: 50%;
+            box-shadow: 0 0 2px white;
             pointer-events: none;
         }
         @keyframes bubbleUp {
             0% { transform: translateY(0); opacity: 0; }
             20% { opacity: 0.6; }
-            80% { opacity: 0.6; }
-            100% { transform: translateY(-80px); opacity: 0; }
+            100% { transform: translateY(-70px); opacity: 0; }
         }
 
-        /* 液体の表面に波打ちエフェクト */
+        /* 波打ちエフェクト */
         .wave {
             position: absolute;
-            top: -5px;
+            top: -3px;
             left: 0;
             width: 200%;
-            height: 10px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 40%;
-            animation: waveFlow 4s linear infinite;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 35%;
+            animation: waveFlow 3s linear infinite;
         }
         @keyframes waveFlow {
             from { transform: translateX(0); }
             to { transform: translateX(-50%); }
-        }    
+        }
     </style>
 </head>
-<body oncontextmenu="return false;"> <div class="main-title">【性癖瓶】</div>
+<body oncontextmenu="return false;">
+    <div class="main-title">【性癖瓶】</div>
 
     <div class="rule-box">
         <h2>◾︎ 性癖瓶のルール ◾︎</h2>
@@ -102,9 +97,8 @@
         </div>
         <div class="usage-notes">
             ・<strong>操作:</strong> ＋ボタン長押しで注ぎ、ーで減らします。<br>
-            ・<strong>濃度:</strong> スライダーで「本気度」を表現してください。<br>
+            ・<strong>濃度:</strong> スライダーで「本気度」を表現（気泡が昇ります）。<br>
             ・<strong>ロック:</strong> 右上の 🔓 を押すと蓋が閉まり固定されます。<br>
-            ・<strong>共有:</strong> 完成したら下のボタンでURLを発行！<br>
             <span class="warning-note">⚠️ 注意：音が出ます。</span>
         </div>
     </div>
@@ -129,8 +123,8 @@
             const osc = audioCtx.createOscillator(); 
             const gain = audioCtx.createGain(); 
             osc.type = 'sine'; 
-            osc.frequency.setValueAtTime(150, audioCtx.currentTime); 
-            gain.gain.setValueAtTime(0.03, audioCtx.currentTime); 
+            osc.frequency.setValueAtTime(150 + Math.random()*20, audioCtx.currentTime); 
+            gain.gain.setValueAtTime(0.02, audioCtx.currentTime); 
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05); 
             osc.connect(gain); gain.connect(audioCtx.destination); 
             osc.start(); osc.stop(audioCtx.currentTime + 0.05); 
@@ -142,8 +136,8 @@
             const gain = audioCtx.createGain(); 
             osc.type = 'triangle'; 
             osc.frequency.setValueAtTime(600, audioCtx.currentTime); 
-            osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.1); 
-            gain.gain.setValueAtTime(0.05, audioCtx.currentTime); 
+            osc.frequency.exponentialRampToValueAtTime(450, audioCtx.currentTime + 0.1); 
+            gain.gain.setValueAtTime(0.04, audioCtx.currentTime); 
             gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1); 
             osc.connect(gain); gain.connect(audioCtx.destination); 
             osc.start(); osc.stop(audioCtx.currentTime + 0.1); 
@@ -163,13 +157,12 @@
                 const card = document.createElement('div');
                 card.className = `bottle-card ${b.locked ? 'locked' : ''}`;
                 
-                // 気泡の生成（HTML要素として追加）
                 let bubblesHTML = '';
                 if (b.level > 5) {
-                    for(let j=0; j<5; j++) {
+                    for(let j=0; j<4; j++) {
                         const left = Math.random() * 80 + 10;
-                        const delay = Math.random() * 3;
-                        const duration = 2 + Math.random() * 2;
+                        const delay = Math.random() * 4;
+                        const duration = 2 + Math.random() * 3;
                         bubblesHTML += `<div class="bubble" style="left:${left}%; bottom:0; animation: bubbleUp ${duration}s linear ${delay}s infinite;"></div>`;
                     }
                 }
@@ -181,7 +174,7 @@
                     <div class="color-selector" style="display:flex;justify-content:center;gap:5px;margin-bottom:8px;">
                         ${PRESET_COLORS.map(c => `<div class="c-btn" style="width:18px;height:18px;border-radius:50%;cursor:pointer;background:${c};border:${b.color===c?'2px solid #333':'2px solid transparent'}" onclick="updateColor(${i},'${c}')"></div>`).join('')}
                     </div>
-                    <div class="bottle-frame">
+                    <div class="bottle-frame" id="frame-${i}">
                         <div id="liquid-${i}" class="liquid" style="height:${b.level}%; background:${b.color}; opacity:${b.alpha};">
                             <div class="wave"></div>
                             ${bubblesHTML}
@@ -204,27 +197,21 @@
             if (audioCtx.state === 'suspended') audioCtx.resume();
             if (pressInterval) return;
             
-            // 注いでいる間は揺れを止める
-            const liq = document.getElementById(`liquid-${i}`);
-            if(liq) liq.style.animation = 'none';
+            const frame = document.getElementById(`frame-${i}`);
+            if(frame) frame.style.animation = 'none';
 
             pressInterval = setInterval(() => {
                 let old = bottles[i].level;
                 bottles[i].level = Math.max(0, Math.min(100, bottles[i].level + diff));
                 if (old !== bottles[i].level) {
                     playPourSound();
-                    renderProgress(i); // render全体を呼ばず、数値と高さだけ更新（効率化）
+                    const liq = document.getElementById(`liquid-${i}`);
+                    const span = liq.closest('.bottle-card').querySelector('.pour-controls span');
+                    if(liq) liq.style.height = bottles[i].level + '%';
+                    if(span) span.innerText = bottles[i].level + '%';
                 }
                 if (bottles[i].level === 100 || bottles[i].level === 0) stopPress(i);
             }, 60);
-        }
-
-        // 高さと数字だけを更新してチラつきを防ぐ
-        function renderProgress(i) {
-            const liq = document.getElementById(`liquid-${i}`);
-            const span = liq.closest('.bottle-card').querySelector('.pour-controls span');
-            if(liq) liq.style.height = bottles[i].level + '%';
-            if(span) span.innerText = bottles[i].level + '%';
         }
 
         function stopPress(i) {
@@ -233,13 +220,11 @@
                 pressInterval = null;
                 playFinishSound();
                 
-                // 指を離した瞬間に揺れアニメーションを適用
-                const liq = document.getElementById(`liquid-${i}`);
-                if(liq && bottles[i].level > 0 && bottles[i].level < 100) {
-                    liq.style.animation = 'liquidSway 2s ease-in-out';
+                const frame = document.getElementById(`frame-${i}`);
+                if(frame && bottles[i].level > 0) {
+                    frame.style.animation = 'liquidSway 0.8s ease-in-out';
                 }
-                // アニメーション終了後に全体を再描画して気泡の位置などを確定
-                setTimeout(() => render(), 2000);
+                setTimeout(() => render(), 800);
             }
         }
 
