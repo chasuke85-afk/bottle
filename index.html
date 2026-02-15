@@ -8,7 +8,7 @@
         :root { --bg: #fdfbfb; --accent: #ff4d79; --rule-color: #e63946; }
         body { font-family: sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 15px; color: #444; margin: 0; }
         
-                /* ルール説明枠のスタイル */
+        /* ルール説明枠 */
         .rule-box { border: 2px solid var(--rule-color); background: #fff5f5; border-radius: 12px; padding: 15px; margin-bottom: 25px; max-width: 500px; width: 90%; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .rule-box h2 { margin: 0 0 12px 0; font-size: 1rem; color: var(--rule-color); text-align: center; border-bottom: 1px dashed var(--rule-color); padding-bottom: 5px; }
         
@@ -16,7 +16,8 @@
         .guide-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: bold; }
         .color-chip { width: 18px; height: 18px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); }
         
-        .usage-notes { font-size: 0.75rem; color: #666; border-top: 1px solid #eee; pt: 10px; padding-top: 10px; line-height: 1.4; }
+        .usage-notes { font-size: 0.75rem; color: #666; border-top: 1px solid #eee; padding-top: 10px; line-height: 1.4; }
+
         /* コンテナ（スマホで2カラム） */
         .container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; max-width: 900px; }
         @media (min-width: 600px) { .container { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; } }
@@ -27,7 +28,7 @@
         .bottle-frame { width: 60px; height: 90px; border: 3px solid #333; border-radius: 6px 6px 20px 20px; margin: 10px auto; position: relative; overflow: hidden; background: #f0f0f0; }
         .liquid { position: absolute; bottom: 0; width: 100%; transition: height 0.1s linear; }
         
-        /* 色・操作系 */
+        /* 操作系 */
         .color-selector { display: flex; justify-content: center; gap: 5px; margin-bottom: 8px; }
         .c-btn { width: 18px; height: 18px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
         .c-btn.active { border-color: #333; transform: scale(1.1); }
@@ -35,10 +36,9 @@
         .pour-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .p-btn { 
             width: 35px; height: 35px; border-radius: 50%; border: none; background: #eee; cursor: pointer; font-size: 1.2rem; 
-            user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; /* 長押しコピー防止 */
+            user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
         }
         
-        /* 滑らかなスライダー */
         input[type="range"] { width: 100%; cursor: pointer; accent-color: #666; margin: 0; }
         input[type="text"] { width: 90%; border: none; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; margin-bottom: 8px; font-size: 0.8rem; }
         
@@ -49,9 +49,8 @@
 </head>
 <body>
 
-       <div class="rule-box">
-        <h2>◀︎性癖瓶のルール▶︎</h2>
-        
+    <div class="rule-box">
+        <h2>◾︎ 性癖瓶のルール ◾︎</h2>
         <div class="color-guide">
             <div class="guide-item">
                 <div class="color-chip" style="background: #ff5d8f;"></div>
@@ -66,7 +65,6 @@
                 <span>青色：嫌い / 苦手・地雷</span>
             </div>
         </div>
-
         <div class="usage-notes">
             ・<strong>操作:</strong> ＋ボタン長押しで注ぎ、ーで減らします。<br>
             ・<strong>濃度:</strong> スライダーで「本気度」を表現してください。<br>
@@ -74,6 +72,12 @@
         </div>
     </div>
 
+    <div class="container" id="bottleContainer"></div>
+
+    <div class="controls">
+        <button class="main-btn" style="background:var(--accent)" onclick="addBottle()">項目追加</button>
+        <button class="main-btn" onclick="generateShareURL()">URLをコピー</button>
+    </div>
 
     <script>
         const PRESET_COLORS = ['#ff5d8f', '#94a3b8', '#6366f1'];
